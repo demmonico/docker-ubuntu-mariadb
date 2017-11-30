@@ -1,14 +1,12 @@
 #!/bin/bash
 #
-# DEPRECATED
-#
 # This file has executed each time when container's starts
 #
 # tech-stack: ubuntu / mariadb
 #
 # @author demmonico
 # @image ubuntu-mariadb
-# @version v1.1
+# @version v2.0
 
 
 
@@ -16,6 +14,7 @@
 if [ -z "${DB_NAME}" ]; then
   DB_NAME=${PROJECT}
 fi
+
 
 
 ##### run once
@@ -31,9 +30,9 @@ fi
 ##### run
 
 ### run custom script if exists
-if [ ! -z ${CUSTOM_RUN_SCRIPT} ] && [ -f ${CUSTOM_RUN_SCRIPT} ] && [ -x ${CUSTOM_RUN_SCRIPT} ]
-then
-    /bin/bash ${CUSTOM_RUN_SCRIPT}
+CUSTOM_SCRIPT="${INSTALL_DIR}/custom.sh"
+if [ -f ${CUSTOM_SCRIPT} ]; then
+    chmod +x ${CUSTOM_SCRIPT} && source ${CUSTOM_SCRIPT}
 fi
 
 ### run supervisord

@@ -1,12 +1,10 @@
-# DEPRECATED
-#
 # Dockerfile for build app container
 #
 # tech-stack: ubuntu / mariadb
 #
 # @author demmonico
 # @image ubuntu-mariadb
-# @version v1.1
+# @version v2.0
 
 
 FROM ubuntu:14.04
@@ -25,6 +23,9 @@ ENV TERM xterm
 
 # dafault name of internal DB
 ENV DB_NAME=''
+
+# additional files required to run container (from version v2.0)
+ENV INSTALL_DIR="/docker-install"
 
 
 ### INSTALL SOFTWARE
@@ -71,12 +72,16 @@ EXPOSE 3306
 # copy supervisord config file
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 
-# init run once flag
+# copy and init run_once script
 COPY run_once.sh /run_once.sh
-ENV RUN_ONCE_FLAG "/run_once"
-RUN tee ${RUN_ONCE_FLAG} && chmod +x /run_once.sh
+ENV RUN_ONCE_FLAG="/run_once_flag"
+RUN tee "${RUN_ONCE_FLAG}" && chmod +x /run_once.sh
 
-# init run script
+# run custom run command if defined
+ARG CUSTOM_BUILD_COMMAND
+RUN ${CUSTOM_BUILD_COMMAND:-":"}
+
+# copy and init run script
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 CMD ["/run.sh"]

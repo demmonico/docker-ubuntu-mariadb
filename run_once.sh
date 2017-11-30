@@ -1,14 +1,12 @@
 #!/bin/bash
 #
-# DEPRECATED
-#
 # This file has executed after container's builds
 #
 # tech-stack: ubuntu / mariadb
 #
 # @author demmonico
 # @image ubuntu-mariadb
-# @version v1.1
+# @version v2.0
 
 
 
@@ -54,7 +52,7 @@ fi
 
 
 ### run custom script if exists
-if [ ! -z ${CUSTOM_RUN_SCRIPT_ONCE} ] && [ -f ${CUSTOM_RUN_SCRIPT_ONCE} ] && [ -x ${CUSTOM_RUN_SCRIPT_ONCE} ]
-then
-    /bin/bash ${CUSTOM_RUN_SCRIPT_ONCE}
+CUSTOM_ONCE_SCRIPT="${INSTALL_DIR}/custom_once.sh"
+if [ -f ${CUSTOM_ONCE_SCRIPT} ]; then
+    chmod +x ${CUSTOM_ONCE_SCRIPT} && source ${CUSTOM_ONCE_SCRIPT}
 fi
