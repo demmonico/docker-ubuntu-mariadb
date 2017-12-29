@@ -37,3 +37,15 @@ fi
 
 ### run supervisord
 exec /usr/bin/supervisord -n
+
+
+### entrypoint
+#exec /usr/bin/mysqld_safe
+
+## recommended, but not tested
+# bind stop Mysql on TERM signal
+#trap "mysqladmin shutdown" TERM
+# start Mysql in background
+#mysqld_safe --bind-address=0.0.0.0 &
+# wait for ending all child processes
+#wait
