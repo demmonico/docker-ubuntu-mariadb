@@ -10,12 +10,13 @@
 
 
 
+
 ### users
 
 # set root password
 echo "root:${DMC_ROOT_PASSWD:-rootPasswd}" | chpasswd
 
-# add dm user, set password, add to www-data group
+# add dm user, set password
 DMC_DM_USER="${DMC_DM_USER:-dm}"
 useradd -m ${DMC_DM_USER} && \
     usermod -a -G root ${DMC_DM_USER} && \
@@ -23,9 +24,12 @@ useradd -m ${DMC_DM_USER} && \
     echo "${DMC_DM_USER}:${DMC_DM_PASSWD:-${DMC_DM_USER}Passwd}" | chpasswd
 
 
-
 # colored term
-PS1="PS1='\[\033[01;35m\]\t\[\033[00m\] \${debian_chroot:+(\$debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\] \[\033[01;35m\]\${VIRTUAL_HOST}\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\\$ '"
+VC='\[\033[01;35m\]'
+GC='\[\033[01;32m\]'
+BC='\[\033[01;34m\]'
+NC='\[\033[00m\]'
+PS1="PS1='${VC}\t${NC} \${debian_chroot:+(\$debian_chroot)}${GC}\u@\${DMC_EXEC_NAME:-\${VIRTUAL_HOST}}${NC} ${VC}\h${NC}:${BC}\w${NC}\\$ '"
 # prepare to sed
 PS1=$( echo ${PS1} | sed 's/\\/\\\\/g' )
 # replace colors
@@ -52,8 +56,12 @@ if [ ! -d /var/lib/mysql/mysql ]; then
     /usr/sbin/mysqld &
     mysql_pid=$!
 
+    # FIX error with /var/run/mysqld/mysqld.sock
+    mkdir /var/run/mysqld && mkfifo /var/run/mysqld/mysqld.sock && chown -R mysql /var/run/mysqld
+
+    # wait for MySQL starts
     until mysqladmin ping >/dev/null 2>&1; do
-      echo -n "."; sleep 0.2
+        echo -n "."; sleep 0.2
     done
 
     # Permit root login without password from outside container.
@@ -65,8 +73,7 @@ if [ ! -d /var/lib/mysql/mysql ]; then
 
     # import database from SQL if exists
     FILE_IMPORT="/var/lib/mysql/${DMC_DB_NAME}.sql"
-    if [ -f ${FILE_IMPORT} ]
-    then
+    if [ -f ${FILE_IMPORT} ]; then
         mysql ${DMC_DB_NAME} < ${FILE_IMPORT}
     fi
 

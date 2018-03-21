@@ -27,6 +27,7 @@ You could pull image from here and build locally either pull from [Docker Hub](h
 
 - DMC_DB_NAME
 - DMC_INSTALL_DIR
+- DMC_EXEC_NAME
 
 
 ## Build && push

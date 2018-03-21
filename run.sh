@@ -34,6 +34,11 @@ CUSTOM_SCRIPT="${DMC_INSTALL_DIR}/custom.sh"
 if [ -f ${CUSTOM_SCRIPT} ]; then
     chmod +x ${CUSTOM_SCRIPT} && source ${CUSTOM_SCRIPT}
 fi
+if [ ! -z "${DMC_CUSTOM_RUN_COMMAND}" ]; then
+    eval ${DMC_CUSTOM_RUN_COMMAND}
+fi
+
+
 
 ### run supervisord
 exec /usr/bin/supervisord -n
