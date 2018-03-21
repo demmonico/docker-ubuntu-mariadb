@@ -4,7 +4,7 @@
 #
 # @author demmonico
 # @image ubuntu-mariadb
-# @version v2.0
+# @version v3.2
 
 
 FROM ubuntu:14.04
@@ -22,64 +22,65 @@ ENV LC_ALL=en_US.UTF-8
 ENV TERM xterm
 
 # dafault name of internal DB
-ENV DB_NAME=''
+ENV DMC_DB_NAME=''
 
-# additional files required to run container (from version v2.0)
-ENV INSTALL_DIR="/docker-install"
+# additional files required to run container
+ENV DMC_INSTALL_DIR="/dm-install"
 
 
 ### INSTALL SOFTWARE
-ARG MARIADB_VER='10.1'
-RUN apt-get update \
-    && apt-get -y install software-properties-common \
-    && apt-get update \
+ARG DMB_DB_MARIADB_VER='10.1'
+RUN apt-get -yqq update \
+    && apt-get -yqq install software-properties-common \
+    && apt-get -yqq update \
 
     # curl, zip, unzip
-    && apt-get install -y --force-yes  --no-install-recommends curl zip unzip \
+    && apt-get install -yqq --force-yes --no-install-recommends curl zip unzip \
 
     # DB server
-    && apt-get install -y software-properties-common \
     && apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db \
-    && add-apt-repository "deb [arch=amd64,i386,ppc64el] http://www.ftp.saix.net/DB/mariadb/repo/${MARIADB_VER}/ubuntu trusty main" \
-    && apt-get update \
-    && apt-get install -y mariadb-server \
+    && add-apt-repository "deb [arch=amd64,i386,ppc64el] http://www.ftp.saix.net/DB/mariadb/repo/${DMB_DB_MARIADB_VER}/ubuntu trusty main" \
+    && apt-get -yqq update \
+    && apt-get -yqq install mariadb-server \
     # configure DB
     && chown -R mysql:mysql /var/lib/mysql \
 
     # demonisation for docker
-    && apt-get install -y supervisor \
+    && apt-get -yqq install supervisor && mkdir -p /var/log/supervisor \
 
     # mc, rsync and other utils
-    && apt-get -qq update && apt-get -qq -y install mc rsync htop \
+    && apt-get -yqq install mc rsync htop nano
 
-    # clear apt etc
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/mysql \
-    && mkdir -p /var/log/supervisor
 
+
+### UPDATE & RUN PROJECT
+
+EXPOSE 3306
+
+# copy supervisord config file
+COPY supervisord.conf /etc/supervisor/supervisord.conf
 
 # config DB
 COPY mariadb.cnf /etc/mysql/my.cnf
 RUN chmod 600 /etc/mysql/my.cnf
 COPY mariadb-debian.cnf /etc/mysql/debian.cnf
 
-
-EXPOSE 3306
-
-
-### UPDATE & RUN PROJECT
-
-# copy supervisord config file
-COPY supervisord.conf /etc/supervisor/supervisord.conf
-
 # copy and init run_once script
 COPY run_once.sh /run_once.sh
-ENV RUN_ONCE_FLAG="/run_once_flag"
-RUN tee "${RUN_ONCE_FLAG}" && chmod +x /run_once.sh
+ENV DMC_RUN_ONCE_FLAG="/run_once_flag"
+RUN tee "${DMC_RUN_ONCE_FLAG}" && chmod +x /run_once.sh
 
 # run custom run command if defined
-ARG CUSTOM_BUILD_COMMAND
-RUN ${CUSTOM_BUILD_COMMAND:-":"}
+ARG DMB_CUSTOM_BUILD_COMMAND
+RUN ${DMB_CUSTOM_BUILD_COMMAND:-":"}
+
+
+
+# clean temporary and unused folders and caches
+RUN apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/mysql
+
+
 
 # copy and init run script
 COPY run.sh /run.sh

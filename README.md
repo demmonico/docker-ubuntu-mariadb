@@ -14,19 +14,19 @@ You could pull image from here and build locally either pull from [Docker Hub](h
 - MariaDB 10.1
 - curl, zip, unzip
 - supervisor
-- mc, rsync, htop
+- mc, rsync, htop, nano
 
 
 ### Build arguments
 
-- MARIADB_VER (default 10.1)
-- CUSTOM_BUILD_COMMAND (will run if defined in the end of build)
+- DMB_DB_MARIADB_VER (default 10.1)
+- DMB_CUSTOM_BUILD_COMMAND (will run if defined in the end of build)
 
 
 ### Environment variables
 
-- DB_NAME
-- INSTALL_DIR
+- DMC_DB_NAME
+- DMC_INSTALL_DIR
 
 
 ## Build && push
@@ -39,7 +39,7 @@ docker build -t demmonico/ubuntu-mariadb --no-cache .
 ```
 or build image with MariaDB version specified.
 ```sh
-docker build -t demmonico/ubuntu-mariadb --build-arg MARIADB_VER=10.1 --no-cache .
+docker build -t demmonico/ubuntu-mariadb --build-arg DMB_DB_MARIADB_VER=10.1 --no-cache .
 ```
 
 ### Make tag
@@ -67,10 +67,10 @@ docker push demmonico/ubuntu-mariadb:10.1
 FROM demmonico/ubuntu-mariadb:10.1
   
 # optional copy files to install container
-COPY install "${INSTALL_DIR}/"
+COPY install "${DMC_INSTALL_DIR}/"
   
 # optional config DB
-RUN yes | cp -rf "${INSTALL_DIR}/mariadb.cnf" /etc/mysql/my.cnf \
+RUN yes | cp -rf "${DMC_INSTALL_DIR}/mariadb.cnf" /etc/mysql/my.cnf \
     && chmod 600 /etc/mysql/my.cnf
   
 CMD ["/run.sh"]
@@ -86,7 +86,7 @@ build: local_path_to_dockerfile
   
 environment:
   # optional
-  - DB_NAME=test_db
+  - DMC_DB_NAME=test_db
   
 volumes:
   # db tables
