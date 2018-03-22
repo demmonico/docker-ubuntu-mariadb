@@ -81,23 +81,18 @@ CMD ["/run.sh"]
 
 ```sh
 ...
-image: demmonico/ubuntu-mariadb
-# or
-build: local_path_to_dockerfile
-  
-environment:
-  # optional
-  - DMC_DB_NAME=test_db
-  
-volumes:
-  # db tables
-  - ./db/data:/var/lib/mysql
-  # optional custom configs
-  - ./mariadb.cnf:/etc/mysql/my.cnf
-  
-env_file:
-  # provides values for ENV variables VIRTUAL_HOST, PROJECT, HOST_USER_NAME, HOST_USER_ID
-  - host.env
+db:
+  image: demmonico/ubuntu-mariadb
+  # or
+  build: local_path_to_dockerfile
+      
+  environment:
+    # optional
+    - DMC_DB_NAME=test_db
+    
+  volumes:
+    # optional custom configs
+    - ./mariadb.cnf:/etc/mysql/my.cnf
 ...
 ```
 
