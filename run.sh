@@ -40,8 +40,19 @@ fi
 
 
 
+### FIX permissions
+chown -R mysql:mysql ${DMC_DB_FILES_DIR}
+
+
+
+### FIX cron start
+cron
+
+
+
 ### run supervisord
 exec /usr/bin/supervisord -n
+
 
 
 ### entrypoint

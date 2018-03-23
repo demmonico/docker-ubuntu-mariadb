@@ -1,8 +1,10 @@
-# 3.2 (2018-03-21)
+# 3.2 (2018-03-22)
 
 - link to a new image version [docker-ubuntu-apache-php](https://github.com/demmonico/docker-ubuntu-apache-php) (v3.2)
 - DM* prefixed and renamed
-- FIX mysqladmin fail linked with `sock` file
+- FIX `mysqladmin` fail linked with `sock` file
+- FIX `mysql` user permissions via set UID from `DM_USER`
+- add env var `DMC_DB_FILES_DIR`
 
 
 # 2.0 (2017-11-30)

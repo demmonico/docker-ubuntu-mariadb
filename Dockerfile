@@ -21,11 +21,15 @@ ENV LC_ALL=en_US.UTF-8
 # for mc
 ENV TERM xterm
 
-# dafault name of internal DB
-ENV DMC_DB_NAME=''
-
 # additional files required to run container
 ENV DMC_INSTALL_DIR="/dm-install"
+
+# default name of internal DB
+ENV DMC_DB_NAME=''
+
+# default place of DB files
+ENV DMC_DB_FILES_DIR=/var/lib/mysql
+
 
 
 ### INSTALL SOFTWARE
@@ -43,7 +47,7 @@ RUN apt-get -yqq update \
     && apt-get -yqq update \
     && apt-get -yqq install mariadb-server \
     # configure DB
-    && chown -R mysql:mysql /var/lib/mysql \
+    && chown -R mysql:mysql ${DMC_DB_FILES_DIR} \
 
     # demonisation for docker
     && apt-get -yqq install supervisor && mkdir -p /var/log/supervisor \
@@ -59,6 +63,10 @@ EXPOSE 3306
 
 # copy supervisord config file
 COPY supervisord.conf /etc/supervisor/supervisord.conf
+
+# copy files to install container
+COPY install "${DMC_INSTALL_DIR}/"
+RUN find "${DMC_INSTALL_DIR}" -type f -iname "*.sh" -exec chmod +x {} \;
 
 # config DB
 COPY mariadb.cnf /etc/mysql/my.cnf
@@ -78,7 +86,7 @@ RUN ${DMB_CUSTOM_BUILD_COMMAND:-":"}
 
 # clean temporary and unused folders and caches
 RUN apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/mysql
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* ${DMC_DB_FILES_DIR}
 
 
 

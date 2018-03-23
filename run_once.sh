@@ -14,12 +14,17 @@
 ### users
 
 # set root password
-echo "root:${DMC_ROOT_PASSWD:-rootPasswd}" | chpasswd
+ROOT_PWD="${DMC_ROOT_PASSWD:-rootPasswd}"
+echo "root:${ROOT_PWD}" | chpasswd
+
+# set apache user ID equal to host's owner ID
+usermod -u ${DM_HOST_USER_ID} mysql && groupmod -g ${DM_HOST_USER_ID} mysql
 
 # add dm user, set password
 DMC_DM_USER="${DMC_DM_USER:-dm}"
 useradd -m ${DMC_DM_USER} && \
     usermod -a -G root ${DMC_DM_USER} && \
+    usermod -a -G mysql ${DMC_DM_USER} && \
     adduser dm sudo && \
     echo "${DMC_DM_USER}:${DMC_DM_PASSWD:-${DMC_DM_USER}Passwd}" | chpasswd
 
@@ -44,13 +49,13 @@ done
 
 
 ### init DB
-if [ ! -d /var/lib/mysql/mysql ]; then
+if [ ! -d "${DMC_DB_FILES_DIR}/mysql" ]; then
 
     # set permissions
-    chown mysql:mysql /var/lib/mysql
+    chown mysql:mysql ${DMC_DB_FILES_DIR}
 
     # init system tables
-    mysql_install_db --user=mysql --ldata=/var/lib/mysql/ --basedir=/usr
+    mysql_install_db --user=mysql --ldata=${DMC_DB_FILES_DIR}/ --basedir=/usr
 
     # Start the MySQL daemon in the background.
     /usr/sbin/mysqld &
@@ -64,6 +69,9 @@ if [ ! -d /var/lib/mysql/mysql ]; then
         echo -n "."; sleep 0.2
     done
 
+    # change root password
+    mysqladmin -u root password "${ROOT_PWD}"
+
     # Permit root login without password from outside container.
     mysql -e "CREATE USER 'root'@'%' IDENTIFIED BY '';"
     mysql -e "GRANT ALL ON *.* TO 'root'@'%' IDENTIFIED BY '' WITH GRANT OPTION;"
@@ -72,7 +80,7 @@ if [ ! -d /var/lib/mysql/mysql ]; then
     mysql -e "CREATE DATABASE ${DMC_DB_NAME};"
 
     # import database from SQL if exists
-    FILE_IMPORT="/var/lib/mysql/${DMC_DB_NAME}.sql"
+    FILE_IMPORT="${DMC_DB_FILES_DIR}/${DMC_DB_NAME}.sql"
     if [ -f ${FILE_IMPORT} ]; then
         mysql ${DMC_DB_NAME} < ${FILE_IMPORT}
     fi
