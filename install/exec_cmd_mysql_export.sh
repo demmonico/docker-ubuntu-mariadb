@@ -1,17 +1,24 @@
 #!/usr/bin/env bash
 #
-# Create DB dump lib for MySQL/MariaDB DM's containers
+# Export script for MySQL/MariaDB DM's containers
 #
 # @author demmonico
 # @link https://github.com/demmonico
 # @image ubuntu-mariadb
 #
+# FORMAT:
+#   # to get dump.sql
+#   ./script
+#   or
+#   # to get dump.sql.gz
+#   ./script gzip
+#
 
 
-# create DB dump
-function mysqlDumpCreate()
+# export
+function mysqlExport()
 {
-    local formatOutput='sql'
+    local formatOutput=$1
     local DB_NAME=${DMC_DB_NAME:-${DM_PROJECT}}
     local FILE=`date +${DMC_DB_FILES_DIR}/${DB_NAME}_%Y-%m-%d_%H-%M-%S.sql`
     local ROOT_PWD="${DMC_ROOT_PASSWD:-rootPasswd}"
@@ -19,10 +26,10 @@ function mysqlDumpCreate()
 
     if [ "${formatOutput}" == 'gzip' ]; then
         FILE="${FILE}.gz"
-        sudo mysqldump ${PARAMS} --databases ${DB_NAME} | gzip > "${FILE}" && sudo chown mysql:mysql "${FILE}"
+        mysqldump ${PARAMS} --databases ${DB_NAME} | gzip > "${FILE}" && sudo chown mysql:mysql "${FILE}"
     else
-        sudo mysqldump ${PARAMS} --databases ${DB_NAME} > "${FILE}" && sudo chown mysql:mysql "${FILE}"
+        mysqldump ${PARAMS} --databases ${DB_NAME} > "${FILE}" && sudo chown mysql:mysql "${FILE}"
     fi
 }
 
-mysqlDumpCreate $1
+mysqlExport $1
