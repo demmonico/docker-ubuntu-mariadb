@@ -14,7 +14,6 @@
 ### users
 
 # set root password
-ROOT_PWD="${DMC_ROOT_PASSWD:-rootPasswd}"
 echo "root:${ROOT_PWD}" | chpasswd
 
 # set apache user ID equal to host's owner ID
@@ -58,18 +57,9 @@ if [ ! -d "${DMC_DB_FILES_DIR}/mysql" ]; then
     mysql_install_db --user=mysql --ldata=${DMC_DB_FILES_DIR}/ --basedir=/usr
 
     # Start the MySQL daemon in the background.
-    /usr/sbin/mysqld &
-    mysql_pid=$!
+    startMysqld
 
-    # FIX error with /var/run/mysqld/mysqld.sock
-    mkdir /var/run/mysqld && mkfifo /var/run/mysqld/mysqld.sock && chown -R mysql /var/run/mysqld
-
-    # wait for MySQL starts
-    until mysqladmin ping >/dev/null 2>&1; do
-        echo -n "."; sleep 0.2
-    done
-
-    # change root password
+    # change root password if it's empty
     mysqladmin -u root password "${ROOT_PWD}"
 
     # Permit root login without password from outside container.
@@ -85,11 +75,8 @@ if [ ! -d "${DMC_DB_FILES_DIR}/mysql" ]; then
         mysql ${DMC_DB_NAME} < ${FILE_IMPORT}
     fi
 
-    # Tell the MySQL daemon to shutdown.
-    mysqladmin shutdown
-
-    # Wait for the MySQL daemon to exit.
-    wait $mysql_pid
+    # Shutdown the MySQL daemon
+    stopMysqld
 
 fi
 
