@@ -7,11 +7,7 @@
 # @image ubuntu-mariadb
 #
 # FORMAT:
-#   # to get dump.sql
-#   ./script
-#   or
-#   # to get dump.sql.gz
-#   ./script gzip
+#   ./script FILENAME
 #
 
 
