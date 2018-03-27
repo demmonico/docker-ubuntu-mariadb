@@ -12,6 +12,8 @@
 # start MySQL daemon
 function startMysqld()
 {
+    isMysqldStarted='true'
+
     # Start the MySQL daemon in the background.
     /usr/sbin/mysqld &
     mysql_pid=$!
@@ -62,12 +64,14 @@ fi
 ##### run
 
 # try to set root password if it's empty (apply when database was replaced)
-# Start the MySQL daemon in the background.
-startMysqld
-# change root password
-mysqladmin -u root password "${ROOT_PWD}"
-# Shutdown the MySQL daemon
-stopMysqld
+if [ -z "${isMysqldStarted}" ]; then
+    # Start the MySQL daemon in the background.
+    startMysqld
+    # change root password
+    mysqladmin -u root password "${ROOT_PWD}"
+    # Shutdown the MySQL daemon
+    stopMysqld
+fi
 
 
 
