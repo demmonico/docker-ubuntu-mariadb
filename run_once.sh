@@ -59,9 +59,6 @@ if [ ! -d "${DMC_DB_FILES_DIR}/mysql" ]; then
     # Start the MySQL daemon in the background.
     startMysqld
 
-    # change root password if it's empty
-    mysqladmin -u root password "${ROOT_PWD}"
-
     # Permit root login without password from outside container.
     mysql -e "CREATE USER 'root'@'%' IDENTIFIED BY '';"
     mysql -e "GRANT ALL ON *.* TO 'root'@'%' IDENTIFIED BY '' WITH GRANT OPTION;"
@@ -74,6 +71,9 @@ if [ ! -d "${DMC_DB_FILES_DIR}/mysql" ]; then
     if [ -f ${FILE_IMPORT} ]; then
         mysql ${DMC_DB_NAME} < ${FILE_IMPORT}
     fi
+
+    # change root password if it's empty
+    mysqladmin -u root password "${ROOT_PWD}"
 
     # Shutdown the MySQL daemon
     stopMysqld
