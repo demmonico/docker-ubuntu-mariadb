@@ -28,6 +28,9 @@ You could pull image from here and build locally either pull from [Docker Hub](h
 - DMC_DB_NAME
 - DMC_DB_FILES_DIR (default `/var/lib/mysql`)
 - DMC_INSTALL_DIR
+- DMC_ROOT_PASSWD (on `run_once`)
+- DMC_DM_USER  (on `run_once`)
+- DMC_DM_PASSWD  (on `run_once`)
 - DMC_CUSTOM_RUN_COMMAND
 - DMC_CUSTOM_RUNONCE_COMMAND
 - DMC_EXEC_NAME (pass container's name while `exec` cmd)
