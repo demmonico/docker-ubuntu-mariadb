@@ -60,8 +60,11 @@ if [ ! -d "${DMC_DB_FILES_DIR}/mysql" ]; then
     startMysqld
 
 
-    # create the default database and root
-    mysql -e "CREATE USER 'root'@'%' IDENTIFIED BY '';"
+    # Permit root login without password from outside container.
+    mysql -e "CREATE USER 'root'@'%' IDENTIFIED BY '${ROOT_PWD}';"
+    mysql -u root -e "GRANT ALL ON *.* TO 'root'@'%' IDENTIFIED BY '${ROOT_PWD}' WITH GRANT OPTION;"
+
+    # create the default database
     mysql -e "CREATE DATABASE ${DMC_DB_NAME};"
 
     # import database from SQL if exists
@@ -72,8 +75,7 @@ if [ ! -d "${DMC_DB_FILES_DIR}/mysql" ]; then
 
     # change root password if it's empty
     mysqladmin -u root password "${ROOT_PWD}"
-    # Permit root login without password from outside container.
-    mysql -u root -e "GRANT ALL ON *.* TO 'root'@'%' IDENTIFIED BY '${ROOT_PWD}' WITH GRANT OPTION;"
+
 
     # Shutdown the MySQL daemon
     stopMysqld

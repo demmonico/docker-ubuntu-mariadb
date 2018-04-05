@@ -69,9 +69,10 @@ if [ -z "${isMysqldStarted}" ]; then
     # Start the MySQL daemon in the background.
     startMysqld
     # change root password
-    mysqladmin -u root password "${ROOT_PWD}" && \
-        # Permit root login without password from outside container.
-        mysql -u root -e "GRANT ALL ON *.* TO 'root'@'%' IDENTIFIED BY '${ROOT_PWD}' WITH GRANT OPTION;"
+    mysqladmin -u root password "${ROOT_PWD}"
+    # Permit root login without password from outside container.
+    mysql -u root -p${ROOT_PWD} -e "SET PASSWORD FOR 'root'@'%' = PASSWORD('${ROOT_PWD}');"
+    mysql -u root -p${ROOT_PWD} -e "GRANT ALL ON *.* TO 'root'@'%' IDENTIFIED BY '${ROOT_PWD}' WITH GRANT OPTION;"
     # Shutdown the MySQL daemon
     stopMysqld
 fi
